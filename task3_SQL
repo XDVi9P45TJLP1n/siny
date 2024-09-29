@@ -1,0 +1,69 @@
+CREATE TABLE Clients (
+    ClientID INT PRIMARY KEY,
+    FirstName VARCHAR(50),
+    LastName VARCHAR(50),
+    Email VARCHAR(100),
+    Phone VARCHAR(15)
+);
+
+CREATE TABLE Destinations (
+    DestinationID INT PRIMARY KEY,
+    DestinationName VARCHAR(100),
+    Country VARCHAR(50)
+);
+
+CREATE TABLE Services (
+    ServiceID INT PRIMARY KEY,
+    ServiceName VARCHAR(100),
+    Price DECIMAL(10, 2)
+);
+
+CREATE TABLE Tours (
+    TourID INT PRIMARY KEY,
+    DestinationID INT,
+    TourDate DATE,
+    ClientID INT,
+    FOREIGN KEY (DestinationID) REFERENCES Destinations(DestinationID),
+    FOREIGN KEY (ClientID) REFERENCES Clients(ClientID)
+);
+
+CREATE TABLE TourServices (
+    TourServiceID INT PRIMARY KEY,
+    TourID INT,
+    ServiceID INT,
+    FOREIGN KEY (TourID) REFERENCES Tours(TourID),
+    FOREIGN KEY (ServiceID) REFERENCES Services(ServiceID)
+);
+
+
+//Таблица Tours ссылается на таблицы Clients и Destinations, что позволяет связать каждый тур с конкретным клиентом и направлением.
+//Таблица TourServices связывает туры с услугами, что позволяет добавлять несколько услуг к каждому туру.
+
+1. Таблицы
+1.1. Таблица Clients (Клиенты)
+  ClientID (INT, PRIMARY KEY) — Уникальный идентификатор клиента.
+  FirstName (VARCHAR(50)) — Имя клиента.
+  LastName (VARCHAR(50)) — Фамилия клиента.
+  Email (VARCHAR(100)) — Электронная почта клиента.
+  Phone (VARCHAR(15)) — Телефон клиента.
+
+1.2. Таблица Destinations (Направления)
+  DestinationID (INT, PRIMARY KEY) — Уникальный идентификатор направления.
+  DestinationName (VARCHAR(100)) — Название направления.
+  Country (VARCHAR(50)) — Страна назначения.
+
+1.3. Таблица Services (Услуги)
+  ServiceID (INT, PRIMARY KEY) — Уникальный идентификатор услуги.
+  ServiceName (VARCHAR(100)) — Название услуги.
+  Price (DECIMAL(10, 2)) — Цена услуги.
+
+1.4. Таблица Tours (Туры)
+  TourID (INT, PRIMARY KEY) — Уникальный идентификатор тура.
+  DestinationID (INT, FOREIGN KEY REFERENCES Destinations(DestinationID)) — Ссылка на направление.
+  TourDate (DATE) — Дата тура.
+  ClientID (INT, FOREIGN KEY REFERENCES Clients(ClientID)) — Ссылка на клиента.
+
+1.5. Таблица TourServices (Услуги Тура)
+  TourServiceID (INT, PRIMARY KEY) — Уникальный идентификатор записи.
+  TourID (INT, FOREIGN KEY REFERENCES Tours(TourID)) — Ссылка на тур.
+  ServiceID (INT, FOREIGN KEY REFERENCES Services(ServiceID)) — Ссылка на услугу.
