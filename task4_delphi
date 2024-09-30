@@ -1,0 +1,107 @@
+// DELPHI 12
+// SQL SERVER 19 EXPRESS
+//http://localhost:8080/projectDelphi.dll/GetToursAction
+
+unit WebModuleUnit1;
+
+interface
+
+uses
+  System.SysUtils, System.Classes, Web.HTTPApp, FireDAC.Comp.Client;
+
+type
+  TWebModule1 = class(TWebModule)
+    procedure WebModuleCreate(Sender: TObject);
+    procedure WebModuleDestroy(Sender: TObject);
+    procedure GetToursActionExecute(Sender: TObject; Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+    procedure AddTourActionExecute(Sender: TObject; Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+  private
+    FConnection: TFDConnection;
+    procedure ExecuteSQL(const SQL: string);
+  public
+    { Public declarations }
+  end;
+
+var
+  WebModule1: TWebModule1;
+
+implementation
+
+{%CLASSGROUP 'Vcl.Controls.TControl'}
+
+{$R *.dfm}
+
+procedure TWebModule1.WebModuleCreate(Sender: TObject);
+begin
+  FConnection := TFDConnection.Create(nil);
+  FConnection.DriverName := 'MSSQL';
+  FConnection.Params.Add('Database=TourismDB');
+  FConnection.Params.Add('User_Name=admin');
+  FConnection.Params.Add('Password=admin135');
+  FConnection.Params.Add('Server=localhost');
+  FConnection.LoginPrompt := False;
+  
+  FConnection.Connected := True;
+end;
+
+procedure TWebModule1.WebModuleDestroy(Sender: TObject);
+begin
+  FConnection.Free;
+end;
+
+procedure TWebModule1.ExecuteSQL(const SQL: string);
+var
+  Query: TFDQuery;
+begin
+  Query := TFDQuery.Create(nil);
+  try
+    Query.Connection := FConnection;
+    Query.SQL.Text := SQL;
+    Query.ExecSQL;
+  finally
+    Query.Free;
+  end;
+end;
+
+procedure TWebModule1.GetToursActionExecute(Sender: TObject; Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+var
+  Query: TFDQuery;
+begin
+  Response.ContentType := 'application/json';
+  
+  Query := TFDQuery.Create(nil);
+  try
+    Query.Connection := FConnection;
+    Query.SQL.Text := 'SELECT * FROM Tours';
+    Query.Open;
+    
+    Response.Content := '[]';
+    
+    Handled := True;
+  finally
+    Query.Free;
+  end;
+end;
+
+procedure TWebModule1.AddTourActionExecute(Sender: TObject; Request: TWebRequest; Response: TWebResponse; var Handled: Boolean);
+var
+  Name, StartDateStr, PriceStr: string;
+begin
+  Name := Request.ContentFields.Values['name'];
+  StartDateStr := Request.ContentFields.Values['start_date'];
+  PriceStr := Request.ContentFields.Values['price'];
+
+  ExecuteSQL(Format('INSERT INTO Tours (Name, StartDate, Price) VALUES (''%s'', ''%s'', %s)', [Name, StartDateStr, PriceStr]));
+
+  Response.Content := '{"status": "success"}';
+end;
+
+end.
+
+//SQL code
+CREATE TABLE Tours (
+    TourID INT PRIMARY KEY IDENTITY(1,1),
+    Name NVARCHAR(100),
+    StartDate DATE,
+    Price DECIMAL(10, 2)
+);
